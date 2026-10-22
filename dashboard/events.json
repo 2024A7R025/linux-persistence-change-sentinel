@@ -1,0 +1,28 @@
+{
+  "is_demo": true,
+  "scanned_at": "2026-10-21T00:45:43.767723+00:00",
+  "total_events": 1,
+  "summary": {
+    "total": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0
+  },
+  "events": [
+    {
+      "virtual_path": "/etc/crontab",
+      "real_path": "C:\\Users\\ARUN\\OneDrive\\Desktop\\linux-persistence-change-sentinel\\mock_linux\\etc\\crontab",
+      "change_type": "MODIFIED",
+      "vector_id": "cron_system",
+      "vector_name": "System Crontab",
+      "mitre_id": "T1053.003",
+      "mitre_name": "Scheduled Task/Job: Cron",
+      "severity": "HIGH",
+      "details": "Configuration content modified since baseline snapshot.",
+      "is_demo": true,
+      "diff": "--- Baseline: /etc/crontab\n+++ Current: /etc/crontab\n@@ -6,4 +6,7 @@\n 25 6\t* * *\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )\r\n\n 47 6\t* * 7\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )\r\n\n 52 6\t1 * *\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )\r\n\n-# DEMO: Manual change added by Arun\n+ notepad \".\\mock_linux\\etc\\crontab\"\r\n\n+# Testing Sentinel detection\r\n\n+\r\n\n+\r\n",
+      "timestamp": "2026-10-21T00:45:43.767474+00:00"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Sample System Maintenance Service (DEMO)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux Persistence Change Sentinel - SOC Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-card: #151d30;
+      --bg-card-hover: #1c263f;
+      --border: #23304e;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-green: #22c55e;
+      --accent-yellow: #eab308;
+      --accent-orange: #f97316;
+      --accent-red: #ef4444;
+      --badge-demo: #8b5cf6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .shield-icon {
+      font-size: 28px;
+    }
+
+    .title-group h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .title-group p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .demo-banner {
+      background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), rgba(56, 189, 248, 0.15));
+      border: 1px solid var(--badge-demo);
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .demo-badge-pill {
+      background-color: var(--badge-demo);
+      color: #fff;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 8px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background-color: var(--border);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--bg-card-hover);
+      border-color: var(--accent-blue);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-size: 26px;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .status-healthy { color: var(--accent-green); }
+    .status-alert { color: var(--accent-orange); }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input[type="text"], select {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .table-container {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    th {
+      background-color: rgba(35, 48, 78, 0.4);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: var(--bg-card-hover);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-added { background-color: rgba(34, 197, 94, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+    .badge-modified { background-color: rgba(249, 115, 22, 0.2); color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+    .badge-deleted { background-color: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+    .sev-critical { color: var(--accent-red); font-weight: 700; }
+    .sev-high { color: var(--accent-orange); font-weight: 700; }
+    .sev-medium { color: var(--accent-yellow); font-weight: 600; }
+    .sev-low { color: var(--accent-blue); font-weight: 600; }
+
+    .mitre-tag {
+      background-color: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .file-path {
+      font-family: monospace;
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* Modal for Diff Viewer */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 800px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .diff-box {
+      padding: 16px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      background-color: #070a12;
+      color: #e2e8f0;
+      flex: 1;
+      white-space: pre-wrap;
+    }
+
+    .diff-line-add { color: #4ade80; background-color: rgba(74, 222, 128, 0.1); display: block; }
+    .diff-line-del { color: #f87171; background-color: rgba(248, 113, 113, 0.1); display: block; }
+    .diff-line-info { color: #38bdf8; display: block; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="shield-icon">🛡️</div>
+      <div class="title-group">
+        <h1>Linux Persistence Change Sentinel</h1>
+        <p>Real-time file integrity and persistence vector change detection</p>
+      </div>
+    </div>
+    <div class="controls">
+      <label style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+        <input type="checkbox" id="auto-refresh" checked> Auto-refresh (4s)
+      </label>
+      <button class="btn" onclick="fetchDashboardData()">↻ Refresh</button>
+    </div>
+  </header>
+
+  <div class="demo-banner">
+    <div>
+      <span class="demo-badge-pill">DEMO MODE</span>
+      <strong>Safe Mock Environment Active:</strong> Monitoring simulated configurations in <code>mock_linux/</code>. Real operating system files are never touched.
+    </div>
+    <div id="last-updated" style="color: var(--text-muted); font-size: 12px;">Connecting...</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="card">
+      <div class="card-label">Monitoring Status</div>
+      <div class="card-value" id="status-val">Loading...</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Baseline Monitored Files</div>
+      <div class="card-value" id="baseline-val">0</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Detected Changes</div>
+      <div class="card-value" id="changes-val">0</div>
+    </div>
+    <div class="card">
+      <div class="card-label">High / Critical Alerts</div>
+      <div class="card-value" id="high-crit-val" style="color: var(--accent-orange);">0</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <input type="text" id="search-input" placeholder="Search path or vector..." oninput="renderTable()">
+      <select id="sev-filter" onchange="renderTable()">
+        <option value="ALL">All Severities</option>
+        <option value="CRITICAL">Critical</option>
+        <option value="HIGH">High</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="LOW">Low</option>
+      </select>
+      <select id="type-filter" onchange="renderTable()">
+        <option value="ALL">All Change Types</option>
+        <option value="ADDED">Added</option>
+        <option value="MODIFIED">Modified</option>
+        <option value="DELETED">Deleted</option>
+      </select>
+    </div>
+    <div id="filter-count" style="font-size: 13px; color: var(--text-muted);">Showing 0 events</div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Change Type</th>
+          <th>Severity</th>
+          <th>Monitored Path</th>
+          <th>Vector / ATT&CK Tag</th>
+          <th>Details</th>
+          <th>Timestamp</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="events-body">
+        <tr>
+          <td colspan="7" class="empty-state">
+            <span class="empty-icon">⏳</span>
+            Fetching persistence telemetry...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Diff Viewer Modal -->
+  <div class="modal-overlay" id="diff-modal" onclick="closeDiffModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">File Diff Viewer</h3>
+        <button class="btn" onclick="closeDiffModal()">✕ Close</button>
+      </div>
+      <div class="diff-box" id="diff-content">No diff available.</div>
+    </div>
+  </div>
+
+  <script>
+    let eventsList = [];
+    let systemStatus = {};
+
+    async function fetchDashboardData() {
+      try {
+        const [statusRes, eventsRes] = await Promise.all([
+          fetch('/api/status'),
+          fetch('/api/events')
+        ]);
+
+        if (statusRes.ok) {
+          systemStatus = await statusRes.json();
+          updateStatusCards();
+        }
+
+        if (eventsRes.ok) {
+          const eventsPayload = await eventsRes.json();
+          eventsList = eventsPayload.events || [];
+          renderTable();
+        }
+
+        document.getElementById('last-updated').innerText = 'Last updated: ' + new Date().toLocaleTimeString();
+      } catch (err) {
+        console.warn('Dashboard fetch error (using fallback demonstration data for static/GitHub Pages hosting):', err);
+        if (!systemStatus.baseline_established) {
+          systemStatus = {
+            baseline_established: true,
+            baseline_items_count: 23,
+            total_events_detected: 1,
+            status: "CHANGES DETECTED"
+          };
+          eventsList = [
+            {
+              virtual_path: "/etc/crontab",
+              real_path: "mock_linux/etc/crontab",
+              change_type: "MODIFIED",
+              vector_id: "cron_system",
+              vector_name: "System Crontab",
+              mitre_id: "T1053.003",
+              mitre_name: "Scheduled Task/Job: Cron",
+              severity: "HIGH",
+              details: "Configuration content modified since baseline snapshot.",
+              is_demo: true,
+              diff: "--- Baseline: /etc/crontab\n+++ Current: /etc/crontab\n@@ -6,4 +6,7 @@\n 25 6\t* * *\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )\n 47 6\t* * 7\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )\n 52 6\t1 * *\troot\ttest -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )\n+ notepad \".\\mock_linux\\etc\\crontab\"\n+ Testing Sentinel detection\n",
+              timestamp: new Date().toISOString()
+            }
+          ];
+          updateStatusCards();
+          renderTable();
+          document.getElementById('last-updated').innerText = 'Online Demo Active (GitHub Pages)';
+        }
+      }
+    }
+
+    function updateStatusCards() {
+      const statusVal = document.getElementById('status-val');
+      const baselineVal = document.getElementById('baseline-val');
+      const changesVal = document.getElementById('changes-val');
+      const highCritVal = document.getElementById('high-crit-val');
+
+      if (!systemStatus.baseline_established) {
+        statusVal.innerHTML = '<span class="status-alert">NO BASELINE</span>';
+        baselineVal.innerText = '0';
+      } else if (eventsList.length > 0) {
+        statusVal.innerHTML = '<span class="status-alert">CHANGES DETECTED</span>';
+        baselineVal.innerText = systemStatus.baseline_items_count || '0';
+      } else {
+        statusVal.innerHTML = '<span class="status-healthy">HEALTHY</span>';
+        baselineVal.innerText = systemStatus.baseline_items_count || '0';
+      }
+
+      changesVal.innerText = eventsList.length;
+
+      const highCritCount = eventsList.filter(e => e.severity === 'CRITICAL' || e.severity === 'HIGH').length;
+      highCritVal.innerText = highCritCount;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('events-body');
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      const sevFilter = document.getElementById('sev-filter').value;
+      const typeFilter = document.getElementById('type-filter').value;
+
+      const filtered = eventsList.filter(e => {
+        const matchesSearch = (e.virtual_path || '').toLowerCase().includes(searchTerm) ||
+                              (e.vector_name || '').toLowerCase().includes(searchTerm) ||
+                              (e.mitre_id || '').toLowerCase().includes(searchTerm);
+        const matchesSev = (sevFilter === 'ALL') || (e.severity === sevFilter);
+        const matchesType = (typeFilter === 'ALL') || (e.change_type === typeFilter);
+        return matchesSearch && matchesSev && matchesType;
+      });
+
+      document.getElementById('filter-count').innerText = `Showing ${filtered.length} of ${eventsList.length} events`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty-state">
+              <span class="empty-icon">✅</span>
+              ${eventsList.length === 0 ? 'No persistence changes detected. Environment matches baseline.' : 'No events match the selected filter.'}
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((e, index) => {
+        let typeBadgeClass = 'badge-modified';
+        if (e.change_type === 'ADDED') typeBadgeClass = 'badge-added';
+        if (e.change_type === 'DELETED') typeBadgeClass = 'badge-deleted';
+
+        let sevClass = 'sev-low';
+        if (e.severity === 'CRITICAL') sevClass = 'sev-critical';
+        if (e.severity === 'HIGH') sevClass = 'sev-high';
+        if (e.severity === 'MEDIUM') sevClass = 'sev-medium';
+
+        const demoPill = e.is_demo ? '<span style="font-size: 10px; background: rgba(139, 92, 246, 0.2); color: #c4b5fd; padding: 1px 4px; border-radius: 3px; margin-right: 4px;">DEMO</span>' : '';
+        const timeStr = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : 'N/A';
+        const hasDiff = Boolean(e.diff && e.diff.trim().length > 0);
+
+        return `
+          <tr>
+            <td>
+              ${demoPill}
+              <span class="badge ${typeBadgeClass}">${e.change_type}</span>
+            </td>
+            <td><span class="${sevClass}">${e.severity}</span></td>
+            <td><span class="file-path">${e.virtual_path}</span></td>
+            <td>
+              <div>${e.vector_name}</div>
+              <span class="mitre-tag">${e.mitre_id}</span>
+            </td>
+            <td style="color: var(--text-muted); max-width: 280px;">${e.details}</td>
+            <td style="color: var(--text-muted); font-size: 12px;">${timeStr}</td>
+            <td>
+              ${hasDiff ? `<button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="viewDiff(${index})">View Diff</button>` : '<span style="color: var(--text-muted);">-</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewDiff(index) {
+      const eventItem = eventsList[index];
+      if (!eventItem || !eventItem.diff) return;
+
+      document.getElementById('modal-title').innerText = `Diff: ${eventItem.virtual_path} (${eventItem.change_type})`;
+      const formattedDiff = eventItem.diff.split('\n').map(line => {
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+          return `<span class="diff-line-add">${escapeHtml(line)}</span>`;
+        } else if (line.startsWith('-') && !line.startsWith('---')) {
+          return `<span class="diff-line-del">${escapeHtml(line)}</span>`;
+        } else if (line.startsWith('@@') || line.startsWith('---') || line.startsWith('+++')) {
+          return `<span class="diff-line-info">${escapeHtml(line)}</span>`;
+        }
+        return escapeHtml(line);
+      }).join('\n');
+
+      document.getElementById('diff-content').innerHTML = formattedDiff;
+      document.getElementById('diff-modal').style.display = 'flex';
+    }
+
+    function closeDiffModal() {
+      document.getElementById('diff-modal').style.display = 'none';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Initial load
+    fetchDashboardData();
+
+    // Auto-refresh timer
+    setInterval(() => {
+      if (document.getElementById('auto-refresh').checked) {
+        fetchDashboardData();
+      }
+    }, 4000);
+  </script>
+</body>
+</html>
