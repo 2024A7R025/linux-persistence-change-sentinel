@@ -153,11 +153,11 @@ linux-persistence-change-sentinel/
 | `shell_user_bashrc` | `~/.bashrc` | `T1546.004` | Shell Configuration Modification | **MEDIUM** |
 
 
+
 ## Live Demo
 
-Try the Linux Persistence Change Sentinel dashboard:
+[Open Linux Persistence Change Sentinel Dashboard](https://linux-persistence-change-sentinel-kcxzkytrltpu2nterzyvwh.streamlit.app/)
 
-[Open Live Dashboard](PASTE_YOUR_STREAMLIT_URL_HERE)
+**Note:** The current hosted version displays saved demo data and does not perform real-time monitoring of a Linux system.
 
-**Note:** The hosted dashboard currently uses saved demo data and does not perform real-time monitoring of a Linux system.
 
