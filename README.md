@@ -151,3 +151,13 @@ linux-persistence-change-sentinel/
 | `systemd_system` | `/etc/systemd/system/` | `T1543.002` | System Process: Systemd Service | **HIGH** |
 | `ssh_authorized_keys` | `~/.ssh/authorized_keys` | `T1098.004` | Account Manipulation: SSH Keys | **HIGH** |
 | `shell_user_bashrc` | `~/.bashrc` | `T1546.004` | Shell Configuration Modification | **MEDIUM** |
+
+
+## Live Demo
+
+Try the Linux Persistence Change Sentinel dashboard:
+
+[Open Live Dashboard](PASTE_YOUR_STREAMLIT_URL_HERE)
+
+**Note:** The hosted dashboard currently uses saved demo data and does not perform real-time monitoring of a Linux system.
+
